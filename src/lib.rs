@@ -26,10 +26,13 @@ impl Tasks {
 		Self::default()
 	}
 	pub fn add_task(&mut self, description: String) -> &Task {
-		let mut id = ID.lock().unwrap();
-		*id += 1;
+		let id = {
+		    let mut guard = ID.lock().unwrap();
+		    *guard += 1;
+		    *guard
+		};
 		let smn = Task {
-			id: *id,
+			id,
 			description,
 			status: Status::Pending,
 		};
@@ -53,7 +56,9 @@ impl Tasks {
 	}
 	pub fn show_undone_tasks(&self) {
 		for task in self.tasks.iter() {
-			println!("Task {}: {}. [{:?}]", task.id, task.description, task.status);
+			if task.status != Status::Done {
+				println!("Task {}: {}. [{:?}]", task.id, task.description, task.status);				
+			}
 		}
 	}
 }
